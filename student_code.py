@@ -141,7 +141,88 @@ class KnowledgeBase(object):
             string explaining hierarchical support from other Facts and rules
         """
         ####################################################
-        # Student code goes here
+        # first check if the fact/rule is in the kb
+        if isinstance(fact_or_rule, Fact): 
+            fact_or_rule = self._get_fact(fact_or_rule)
+            if fact_or_rule not in self.facts:
+                return "Fact is not in the KB"
+        elif isinstance(fact_or_rule, Rule):
+            fact_or_rule = self._get_rule(fact_or_rule)
+            if fact_or_rule not in self.rules:
+                return "Rule is not in the KB"
+        elif not isinstance(fact_or_rule, Fact) or not isinstance(fact_or_rule, Rule): 
+            return False
+        
+        string = ""
+        endline = "\n"
+        num = 0
+        # start with facts
+        if isinstance(fact_or_rule, Fact):
+            string += "fact: " + str(fact_or_rule.statement) 
+            if fact_or_rule.asserted == True: 
+                string += " ASSERTED"
+            string += endline
+            if len(fact_or_rule.supported_by) > 0:
+                supports = fact_or_rule.supported_by
+                for s in supports:
+                    string += self.supports_loop(s, num)
+            return string
+        # move onto rules
+        elif isinstance(fact_or_rule, Rule): 
+            lhs = fact_or_rule.lhs
+            string += "rule: (" + str(fact_or_rule.lhs[0])
+            for l in fact_or_rule.lhs[1:]:
+                string += ", " + str(l)
+            string += ") -> " + str(fact_or_rule.rhs)
+            if fact_or_rule.asserted == True:
+                string += " ASSERTED"
+            string += endline
+            if len(fact_or_rule.supported_by) > 0:
+                supports = fact_or_rule.supported_by
+                for s in supports:
+                    string += self.supports_loop(s, num)
+            return string   
+
+    def supports_loop(self, support, n):
+        string = ""
+        num = n + 1
+        endline = "\n"
+        indent = self.calc_indent(num)
+        num += 1
+        string += indent + "SUPPORTED BY" + endline
+        fact = support[0]
+        rule = support[1]
+        string += indent + "  fact: " + str(fact.statement)
+        if fact.asserted == True:   
+            string += " ASSERTED"
+        string += endline
+        if len(fact.supported_by) > 0: 
+            supports = fact.supported_by
+            for s in supports:
+                string += self.supports_loop(s, num)
+        string += indent + "  rule: (" 
+        lhs = rule.lhs
+        string += str(lhs[0])
+        for l in lhs[1:len(lhs)]:
+            string += ", " + str(l) 
+        string += ") -> " + str(rule.rhs)
+        if rule.asserted == True:
+            string += " ASSERTED"
+        string += endline
+        if len(rule.supported_by) > 0:
+            supports = rule.supported_by
+            for s in supports:
+                string += self.supports_loop(s, num)
+        return string
+
+
+    def calc_indent(self, num):
+        indent = ""
+        i = 0
+        while i < num:
+            indent += "  " 
+            i += 1
+        return indent
 
 
 class InferenceEngine(object):
