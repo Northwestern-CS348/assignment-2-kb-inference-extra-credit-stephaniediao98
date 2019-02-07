@@ -183,6 +183,8 @@ class KnowledgeBase(object):
                     string += self.supports_loop(s, num)
             return string   
 
+
+    # this function adds in the supports for the initial fact/rule
     def supports_loop(self, support, n):
         string = ""
         num = n + 1
@@ -215,7 +217,7 @@ class KnowledgeBase(object):
                 string += self.supports_loop(s, num)
         return string
 
-
+    # this function calculates the indentation space
     def calc_indent(self, num):
         indent = ""
         i = 0
